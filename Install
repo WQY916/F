@@ -1,0 +1,113 @@
+#!/bin/bash
+q(){
+	[ -e "$b" ]&&rm $b
+	exit 1
+}
+e(){
+	((r))&&echo "$@"
+}
+p(){
+	((q))||printf "`printf '\\e[%sm%s\\e[0m' "$@"`\n"
+}
+d(){
+	e "$1"
+	shift 1
+	p "$@"
+	p
+	e 安装失败...
+	p 31 安装失败,请重试...
+	q
+}
+k(){
+	p
+	e 强制中断...
+	p 31 强制中断...
+	q
+}
+
+exec 2>&1
+trap k 1 2 9 15
+d= p= r=0 q=0 s=0
+
+termux-wake-lock
+[ -w /sdcard/ ]||termux-setup-storage
+[ -w /sdcard/ ]||d 存储读写授权失败... 33 存储读写授权失败...
+
+(($#))||set -- $opt
+while getopts :d:p:qrs k
+	do
+	v=$OPTARG
+	case $k in
+		r)r=1;export COLUMNS=10;;
+		q)q=1;;
+		d)d=${d/$v /}$v\ ;;
+		p)p=${p/$v /}$v\ ;;
+		s)p=${p/php /}php\  s=1;;
+		*)p 0 错误参数:\  1\;33 -$v 0 ...;q
+	esac
+done
+shift $((OPTIND-1))
+(($#))&&{
+	p 0 无效参数:\  1\;33 "$*" 0 ...
+	q
+}
+[[ -n $d$p ]]||{
+	q=0 p 33 请指定安装任务...
+	q
+}
+
+((${#p}))&&{
+	p 1\;37 内部源:
+	p=${p% } l=/data/data/com.termux/cache/apt/pkgcache.bin
+	apt list|grep -q stable&&[ -e $l ]&&((`date +%s`<`stat -c%X $l`+43200))&&{
+		e 缓存较新,跳过...
+		p 0 缓存较新,跳过...
+	}||{
+		e 更新软件源...
+		p 0 更新软件源...
+		apt update||d 更新失败... 33 '更新失败,\n无法安装所需依赖,\n请检查软件源和网络(代理)是否可用...'
+	}
+	p
+	e 安装软件包: ${p// /, }...
+	p 0 安装软件包:\  1\;33 "${p// /, }" 0 ...
+	COLUMNS=25 apt install -y $p||d 安装失败... 33 安装失败,\\n请检查输入或依赖是否满足...
+	p
+}
+
+((${#d}))&&{
+	p 1\;37 外部源:
+	a=`uname -m`
+        [ $a = armv8l ]&&a=arm||[ $a = aarch64 ]||d 不支持的架构:\ $a... 0 不支持的架构:\  1\;31 $a 0 ...
+	p 0 当前架构:\  1\;33 $a 0 ...
+	p
+	for u in $d
+	do
+		e 下载软件包: $u...
+		p 0 下载软件包:\  1\;33 $u 0 ...
+		b=$u\_$a.tar.xz l=https://raw.githubusercontent.com/WQY916/script/main/bin/$b c=_`COLUMNS=25 curl --connect-timeout 10 -#Ow%{http_code} $l`
+		[ $c = _200 ]&&{
+			e 解压文件...
+			tar xf $b -C $PREFIX/bin||d 解压失败... 33 解压失败,\\n命令不可用或压缩包不完整...
+			rm $b
+		}||{
+			p 33 $l
+			[ $c = _404 ]&&d 下载失败... 33 下载失败,\\n请检查输入是否正确...||d 连接失败... 33 '连接失败,\n请检查网络(代理)是否可用...'
+		}
+	done
+	p
+}
+
+((s))&&{
+	e 创建配置文件...
+	p 1\;37 创建配置文件:
+	mkdir -p ~/.config
+	f=~/.config/fv_cmd.php x=$PREFIX/bin/fvserver
+	echo '<?php header("Connection: keep-alive");header("Access-Control-Allow-Origin: *");header("content-type: text/html;charset=utf-8");system($_GET["v"]) ?>' >$f
+	echo "termux-wake-lock;nice -n-20 php -qS0.0.0.0:8888 $f &" >$x
+	chmod +x $x
+	p
+	p 33 运行 4\;33 fvserver 33 用以启动WEB服务...
+	p
+}
+
+p 1\;32 安装完成...
