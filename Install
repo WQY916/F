@@ -72,7 +72,7 @@ shift $((OPTIND-1));
 	for u in $d;
 	do
 		p 0 \\n下载软件包:\  1\;33 $u 0 ...;
-		b=$u\_$a.tar.xz c=_`COLUMNS=32 curl --connect-timeout 10 -#Ow%{http_code} https://raw.githubusercontent.com/WQY916/script/main/bin/$b`;
+		b=$u\_$a.tar.xz c=_`COLUMNS=32 curl --connect-timeout 10 -#Ow%{http_code} https://raw.githubusercontent.com/WQY916/F/main/bin/$b`;
 		[ $c = _200 ] && { 
 			tar xf $b -C $PREFIX/bin || d 33 解压失败,\\n命令不可用或压缩包不完整...;
 			rm $b
