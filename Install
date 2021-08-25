@@ -89,8 +89,9 @@ shift $((OPTIND - 1))
 }
 ((${#l})) && { 
 	p 1\;37 下载依赖文件:
-	for b in $l
+	for u in $l
 	do
+		b=$u.tar.xz
 		p 0 \\n下载依赖包:\  1\;33 $b 0 ...
 		c lib/$b -O
 		tar xvJf $b -C $PREFIX || d 33 解压失败,\\n命令不可用或压缩包不完整...
