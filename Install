@@ -89,10 +89,11 @@ shift $((OPTIND - 1))
 }
 ((${#l})) && { 
 	p 1\;37 下载依赖文件:
-	for u in $l
+	for b in $l
 	do
-		p 0 \\n下载依赖包:\  1\;33 $u 0 ...
-		c lib/$u -o$PREFIX
+		p 0 \\n下载依赖包:\  1\;33 $b 0 ...
+		c lib/$b -O
+		tar xvJf $b -C $PREFIX || d 33 解压失败,\\n命令不可用或压缩包不完整...
 	done
 	p
 }
