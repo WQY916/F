@@ -1,6 +1,7 @@
 #!/bin/bash
-function p() {
-	((q)) || {
+function p () 
+{ 
+	((q)) || { 
 		i=
 		while (($#)); do
 			((t)) && i+=$2 || i+=\\e[$1m$2\\e[0m
@@ -9,17 +10,20 @@ function p() {
 		printf "$i\n"
 	}
 }
-function q() {
+function q () 
+{ 
 	p "$@"
 	[ -e "$b" ] && rm $b
 	exit 1
 }
-function d() {
+function d () 
+{ 
 	q=0 q "$@\n\n" 31 安装失败,请重试...
 }
-function c() {
+function c () 
+{ 
 	c=_$(COLUMNS=32 curl --connect-timeout 10 -#w%{http_code} https://raw.githubusercontent.com/WQY916/F/main/$@)
-	[ $c = _200 ] || {
+	[ $c = _200 ] || { 
 		[ $c = _404 ] && d 33 下载失败,\\n请检查输入是否正确... || d 33 连接失败,\\n请检查网络\(代理\)是否可用...
 	}
 }
@@ -33,34 +37,34 @@ termux-wake-lock
 (($#)) || set -- $opt
 while getopts :d:l:p:qs k; do
 	v=$OPTARG
-	case $k in
-	q)
-		q=1
+	case $k in 
+		q)
+			q=1
 		;;
-	l)
-		l=${l/$v /}$v\ 
+		l)
+			l=${l/$v /}$v\ 
 		;;
-	d)
-		d=${d/$v /}$v\ 
+		d)
+			d=${d/$v /}$v\ 
 		;;
-	p)
-		p=${p/$v /}$v\ 
+		p)
+			p=${p/$v /}$v\ 
 		;;
-	s)
-		p=${p/php /}php\  s=1
+		s)
+			p=${p/php /}php\  s=1
 		;;
-	*)
-		q 0 错误参数:\  1\;33 -$v 0 ...
+		*)
+			q 0 错误参数:\  1\;33 -$v 0 ...
 		;;
 	esac
 done
 shift $((OPTIND - 1))
 (($#)) && q 0 无效参数:\  1\;33 "$*" 0 ...
 [[ -n $l$d$p ]] || q 33 请指定安装任务...
-((${#p})) && {
+((${#p})) && { 
 	p 1\;37 获取内部软件:
 	p=${p% } c=/data/data/com.termux/cache/apt/pkgcache.bin
-	apt-get indextargets | grep -q stable && [ -e $c ] && (($(date +%s) < $(stat -c%X $c) + 43200)) && p 0 缓存较新,跳过... || {
+	apt-get indextargets | grep -q stable && [ -e $c ] && (($(date +%s) < $(stat -c%X $c) + 43200)) && p 0 缓存较新,跳过... || { 
 		p 0 更新软件源...
 		apt-get update || d 33 更新失败,\\n无法安装所需依赖,\\n请检查软件源和网络\(代理\)是否可用...
 	}
@@ -68,12 +72,13 @@ shift $((OPTIND - 1))
 	apt-get install -y $p || d 33 安装失败,\\n请检查输入是否正确...
 	p
 }
-((${#d})) && {
+((${#d})) && { 
 	p 1\;37 下载静态软件:
 	a=$(uname -m)
 	[ $a = arm* ] && a=arm || [ $a = aarch64 ] || d 0 不支持的架构:\  1\;31 $a 0 ...
 	p 0 当前架构:\  1\;33 $a 0 ...
-	for u in $d; do
+	for u in $d
+	do
 		b=$u\_$a.tar.xz
 		p 0 \\n下载软件包:\  1\;33 $b 0 ...
 		c bin/$b -O
@@ -82,21 +87,21 @@ shift $((OPTIND - 1))
 	done
 	p
 }
-((${#l})) && {
+((${#l})) && { 
 	p 1\;37 下载依赖文件:
-	for u in $l; do
-		b=$PREFIX/lib/$u.jar
-		p 0 \\n下载依赖包:\  1\;33 $u.jar 0 ...
-		c lib/$u.jar -o$b
+	for u in $l
+	do
+		p 0 \\n下载依赖包:\  1\;33 $u 0 ...
+		c lib/$u -o$PREFIX
 	done
 	p
 }
-((s)) && {
+((s)) && { 
 	p 1\;37 创建配置文件:
 	mkdir -p ~/.config
 	f=~/.config/fv_cmd.php x=$PREFIX/bin/fvserver
-	echo '<?php header("Connection: keep-alive");header("Access-Control-Allow-Origin: *");header("content-type: text/html;charset=utf-8");system($_GET["v"]) ?>' >$f
-	echo "termux-wake-lock;nice -n-20 php -qS0.0.0.0:8888 $f &" >$x
+	echo '<?php header("Access-Control-Allow-Origin: *");passthru("$_REQUEST[v]") ?>' > $f
+	echo "termux-wake-lock;nice -n-20 php -qS0.0.0.0:8888 $f &" > $x
 	chmod +x $x
 	p 33 \\n运行 1\;4\;33 fvserver 33 用以启动WEB服务...
 	p
