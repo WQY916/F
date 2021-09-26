@@ -55,7 +55,7 @@ while getopts :d:gl:p:qs k; do
 			p=${p/php /}php\  s=1
 		;;
 		g)
-			url=gitlab.com/WQY916/F_gitlab/-/raw/main/
+			url=https://gitlab.com/WQY916/F_gitlab/-/raw/main/
 		;;
 		*)
 			q 0 错误参数:\  1\;33 -$v 0 ...
