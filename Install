@@ -22,7 +22,7 @@ function d ()
 }
 function c () 
 { 
-	c=_$(COLUMNS=32 curl --connect-timeout 10 -#sw%{http_code} $url$@)
+	c=_$(COLUMNS=32 curl --connect-timeout 10 -L#w%{http_code} $url$@)
 	[ $c = _200 ] || { 
 		[ $c = _404 ] && d 33 下载失败,请检查输入是否正确... || d 33 连接失败,请检查网络\(代理\)是否可用...
 	}
@@ -31,7 +31,7 @@ exec 2>&1
 trap 'q 31 \\n强制中断...' 1 2 9 15
 tty -s
 t=$? l= d= p= q=0 s=0
-url=https://raw.githubusercontent.com/WQY916/F/main/
+url=https://raw.github.com/WQY916/F/main/
 termux-wake-lock
 [ -w /sdcard/ ] || termux-setup-storage
 [ -w /sdcard/ ] || d 33 存储读写授权失败...
@@ -55,7 +55,7 @@ while getopts :d:gl:p:qs k; do
 			p=${p/php /}php\  s=1
 		;;
 		g)
-			url=https://gitee.com/wqy916/F_gitee/raw/main/
+			url=gitlab.com/WQY916/F_gitlab/-/raw/main/
 		;;
 		*)
 			q 0 错误参数:\  1\;33 -$v 0 ...
